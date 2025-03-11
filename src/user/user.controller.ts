@@ -1,6 +1,7 @@
-import { Controller, Post, Body } from "@nestjs/common";
+import { Controller, Post, Body, UseGuards, Put, Req } from "@nestjs/common";
+import { AuthGuard } from '@nestjs/passport';
 import { UserService } from "./user.service";
-import { CreateUserDto, LoginUserDto } from "./user.dto";
+import { CreateUserDto, LoginUserDto, PersonalSettingDto } from "./user.dto";
 
 @Controller('user')
 export class UserController {
@@ -18,5 +19,12 @@ export class UserController {
             return { message: 'Invalid Member' };
         }
         return user;
+    }
+
+    @UseGuards(AuthGuard('jwt')) // JWT 인증 적용 
+    @Put('setting') // 리소스 수정 
+    async setting(@Req() req, @Body() personalSettingDto: PersonalSettingDto) { // @Req() req: req 객체를 가져와 요청산 사용자의 정보를 확인 
+        const userId = req.user.user_id;
+        return this.userService.setting(userId, personalSettingDto);
     }
 }
